@@ -99,16 +99,17 @@ public:
     SistemaLineal *S;
     vector<vector<double>> tabla;
     vector<double> resultadoFinal;
+    bool metodoConvergente = false;
 
     JacobiSolver(SistemaLineal *s) {
         S = s;
     }
 
-    // Opción 3: resultado final
     void resolver() {
         int n = S->n;
         vector<double> x(n, 0.0);
         vector<double> x_new(n, 0.0);
+        metodoConvergente = false;
 
         // Verificar ceros en diagonal
         for(int i=0; i<n; i++){
@@ -136,6 +137,7 @@ public:
             return;
         }
 
+        metodoConvergente = true;
         tabla.clear();
         tabla.push_back(x); // Iteración 0
 
@@ -172,6 +174,11 @@ public:
     }
 
     void mostrarTablaCompleta() {
+        if(!metodoConvergente){
+            cout << "No es posible generar tabla dado a que el metodo no puede converger.\n";
+            return;
+        }
+
         int n = S->n;
         cout << fixed << setprecision(S->fixDecimales);
         cout << "\n--- TABLA COMPLETA ---\n";
@@ -185,6 +192,11 @@ public:
     void mostrarTablaRango(int ini, int fin) {
         int n = S->n;
         cout << fixed << setprecision(S->fixDecimales);
+
+        if(!metodoConvergente){
+            cout << "No es posible generar tabla dado a que el metodo no puede converger.\n";
+            return;
+        }
 
         if (ini < 0 || fin >= tabla.size() || ini > fin) {
             cout << "ADVERTENCIA: El rango solicitado no es válido.\n";
@@ -215,16 +227,20 @@ public:
             archivo << "= " << S->b[i] << "\n";
         }
 
-        archivo << "\n--- RESULTADO FINAL ---\n";
-        for(int i=0;i<S->n;i++)
-            archivo << "x" << i+1 << " = " << resultadoFinal[i] << "\n";
-
-        archivo << "\n--- TABLA DE ITERACIONES ---\n";
-        for(int k=0;k<tabla.size();k++){
-            archivo << "Iteracion " << k << ": ";
+        if(metodoConvergente){
+            archivo << "\n--- RESULTADO FINAL ---\n";
             for(int i=0;i<S->n;i++)
-                archivo << "x" << i+1 << "=" << tabla[k][i] << "  ";
-            archivo << "\n";
+                archivo << "x" << i+1 << " = " << resultadoFinal[i] << "\n";
+
+            archivo << "\n--- TABLA DE ITERACIONES ---\n";
+            for(int k=0;k<tabla.size();k++){
+                archivo << "Iteracion " << k << ": ";
+                for(int i=0;i<S->n;i++)
+                    archivo << "x" << i+1 << "=" << tabla[k][i] << "  ";
+                archivo << "\n";
+            }
+        } else {
+            archivo << "\nNo es posible generar resultados ni tabla dado a que el método no puede converger.\n";
         }
 
         archivo.close();
