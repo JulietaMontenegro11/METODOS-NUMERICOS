@@ -16,7 +16,6 @@ public:
         fixDecimales = 5;
     }
 
-    // Ingresar sistema 2-5 variables
     void ingresarSistema() {
         cout << "\n--- INGRESO DE SISTEMA ---\n";
         do {
@@ -39,16 +38,20 @@ public:
         }
 
         do {
-            cout << "\nIngrese numero de decimales (0-20): ";
+            cout << "\nIngrese numero de decimales (0-15): ";
             cin >> fixDecimales;
-        } while (fixDecimales < 0 || fixDecimales > 20);
+            if(fixDecimales < 0) fixDecimales = 0;
+            if(fixDecimales > 15) {
+                cout << "Se ajusta automáticamente a 15 decimales (maximo seguro para double).\n";
+                fixDecimales = 15;
+            }
+        } while (fixDecimales < 0 || fixDecimales > 15);
 
         acomodarDiagonalDominante();
         cout << "\nSistema reacomodado con diagonal dominante.\n";
         mostrarSistema();
     }
 
-    // Mostrar sistema
     void mostrarSistema() {
         cout << "\n--- SISTEMA ACTUAL ---\n";
         for (int i = 0; i < n; i++) {
@@ -58,12 +61,10 @@ public:
         }
     }
 
-    // Reacomodo para diagonal dominante
     void acomodarDiagonalDominante() {
         for (int i = 0; i < n; i++) {
             int mejorFila = i;
             double maxValor = abs(A[i][i]);
-
             for (int f = i + 1; f < n; f++) {
                 if (abs(A[f][i]) > maxValor) {
                     mejorFila = f;
@@ -77,7 +78,6 @@ public:
         }
     }
 
-    // Mostrar fórmulas de Jacobi
     void mostrarFormulas() {
         cout << "\n--- FORMULAS DE JACOBI ---\n";
         for (int i = 0; i < n; i++) {
@@ -93,9 +93,6 @@ public:
     }
 };
 
-//--------------------------------------------
-//  JACOBI SOLVER
-//--------------------------------------------
 class JacobiSolver {
 public:
     SistemaLineal *S;
@@ -105,7 +102,6 @@ public:
         S = s;
     }
 
-    // Método Jacobi: iterar hasta error 0
     void resolver() {
         int n = S->n;
         vector<double> x(n, 0.0);
@@ -114,10 +110,16 @@ public:
         tabla.clear();
         tabla.push_back(x); // Iteración 0
 
-        double error = 1;
         int iter = 0;
+        double tolerancia = pow(10, -S->fixDecimales);
+        double error = tolerancia + 1;
 
-        while (error > 0) {
+        cout << fixed << setprecision(S->fixDecimales);
+        cout << "\n--- ITERACION 0 ---\n";
+        for (int i = 0; i < n; i++) cout << "x" << i + 1 << " = " << x[i] << "  ";
+        cout << "\n";
+
+        while (error > tolerancia) {
             iter++;
             for (int i = 0; i < n; i++) {
                 double suma = 0;
@@ -135,17 +137,18 @@ public:
 
             x = x_new;
             tabla.push_back(x);
+
+            // Mostrar iteración opcional
+            cout << "--- Iteracion " << iter << " ---\n";
+            for (int i = 0; i < n; i++) cout << "x" << i + 1 << " = " << x[i] << "  ";
+            cout << "\n";
         }
 
-        cout << fixed << setprecision(S->fixDecimales);
         cout << "\n--- RESULTADO FINAL ---\n";
-        cout << "Iteraciones necesarias: " << iter << "\n\n";
-
-        for (int i = 0; i < n; i++)
-            cout << "x" << i + 1 << " = " << x[i] << "\n";
+        cout << "Iteraciones necesarias: " << iter << "\n";
+        for (int i = 0; i < n; i++) cout << "x" << i + 1 << " = " << x[i] << "\n";
     }
 
-    // Mostrar tabla completa
     void mostrarTablaCompleta() {
         int n = S->n;
         cout << fixed << setprecision(S->fixDecimales);
@@ -153,13 +156,11 @@ public:
         cout << "\n--- TABLA COMPLETA ---\n";
         for (int k = 0; k < tabla.size(); k++) {
             cout << "Iteracion " << k << ": ";
-            for (int i = 0; i < n; i++)
-                cout << "x" << i + 1 << "=" << tabla[k][i] << "  ";
+            for (int i = 0; i < n; i++) cout << "x" << i + 1 << "=" << tabla[k][i] << "  ";
             cout << "\n";
         }
     }
 
-    // Tabla por rango
     void mostrarTablaRango(int ini, int fin) {
         int n = S->n;
         cout << fixed << setprecision(S->fixDecimales);
@@ -167,16 +168,12 @@ public:
         cout << "\n--- TABLA EN RANGO ---\n";
         for (int k = ini; k <= fin && k < tabla.size(); k++) {
             cout << "Iteracion " << k << ": ";
-            for (int i = 0; i < n; i++)
-                cout << "x" << i + 1 << "=" << tabla[k][i] << "  ";
+            for (int i = 0; i < n; i++) cout << "x" << i + 1 << "=" << tabla[k][i] << "  ";
             cout << "\n";
         }
     }
 };
 
-//--------------------------------------------
-//  PROGRAMA PRINCIPAL
-//--------------------------------------------
 int main() {
     SistemaLineal S;
     JacobiSolver solver(&S);
@@ -188,7 +185,7 @@ int main() {
         cout << "\n\n====== MENU ======\n";
         cout << "1. Ingresar sistema y reacomodar diagonal dominante\n";
         cout << "2. Mostrar formulas de Jacobi\n";
-        cout << "3. Calcular con Jacobi hasta error 0\n";
+        cout << "3. Calcular con Jacobi hasta tolerancia\n";
         cout << "4. Mostrar tabla de iteraciones\n";
         cout << "5. Salir\n";
         cout << "Seleccione: ";
