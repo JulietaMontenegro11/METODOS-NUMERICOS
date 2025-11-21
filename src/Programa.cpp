@@ -2,6 +2,7 @@
 #include <vector>
 #include <cmath>
 #include <iomanip>
+#include <fstream>
 using namespace std;
 
 class SistemaLineal {
@@ -97,12 +98,13 @@ class JacobiSolver {
 public:
     SistemaLineal *S;
     vector<vector<double>> tabla;
+    vector<double> resultadoFinal;
 
     JacobiSolver(SistemaLineal *s) {
         S = s;
     }
 
-    // Opción 3: mostrar solo resultado final
+    // Opción 3: resultado final
     void resolver() {
         int n = S->n;
         vector<double> x(n, 0.0);
@@ -161,7 +163,8 @@ public:
             tabla.push_back(x);
         }
 
-        // Mostrar solo resultado final
+        resultadoFinal = x;
+
         cout << fixed << setprecision(S->fixDecimales);
         cout << "\n--- RESULTADO FINAL ---\n";
         cout << "Iteraciones necesarias: " << iter << "\n";
@@ -171,7 +174,6 @@ public:
     void mostrarTablaCompleta() {
         int n = S->n;
         cout << fixed << setprecision(S->fixDecimales);
-
         cout << "\n--- TABLA COMPLETA ---\n";
         for (int k = 0; k < tabla.size(); k++) {
             cout << "Iteracion " << k << ": ";
@@ -184,12 +186,49 @@ public:
         int n = S->n;
         cout << fixed << setprecision(S->fixDecimales);
 
+        if (ini < 0 || fin >= tabla.size() || ini > fin) {
+            cout << "ADVERTENCIA: El rango solicitado no es válido.\n";
+            cout << "Iteraciones disponibles: 0 a " << tabla.size() - 1 << "\n";
+            return;
+        }
+
         cout << "\n--- TABLA EN RANGO ---\n";
-        for (int k = ini; k <= fin && k < tabla.size(); k++) {
+        for (int k = ini; k <= fin; k++) {
             cout << "Iteracion " << k << ": ";
             for (int i = 0; i < n; i++) cout << "x" << i + 1 << "=" << tabla[k][i] << "  ";
             cout << "\n";
         }
+    }
+
+    void guardarArchivo() {
+        ofstream archivo("resultado.txt");
+        if(!archivo.is_open()){
+            cout << "Error al crear el archivo.\n";
+            return;
+        }
+
+        archivo << fixed << setprecision(S->fixDecimales);
+        archivo << "--- SISTEMA CON DIAGONAL DOMINANTE ---\n";
+        for(int i=0;i<S->n;i++){
+            for(int j=0;j<S->n;j++)
+                archivo << S->A[i][j] << "x" << j+1 << "  ";
+            archivo << "= " << S->b[i] << "\n";
+        }
+
+        archivo << "\n--- RESULTADO FINAL ---\n";
+        for(int i=0;i<S->n;i++)
+            archivo << "x" << i+1 << " = " << resultadoFinal[i] << "\n";
+
+        archivo << "\n--- TABLA DE ITERACIONES ---\n";
+        for(int k=0;k<tabla.size();k++){
+            archivo << "Iteracion " << k << ": ";
+            for(int i=0;i<S->n;i++)
+                archivo << "x" << i+1 << "=" << tabla[k][i] << "  ";
+            archivo << "\n";
+        }
+
+        archivo.close();
+        cout << "Archivo 'resultado.txt' creado correctamente.\n";
     }
 };
 
@@ -206,7 +245,8 @@ int main() {
         cout << "2. Mostrar formulas de Jacobi\n";
         cout << "3. Calcular con Jacobi hasta tolerancia (resultado final)\n";
         cout << "4. Mostrar tabla de iteraciones\n";
-        cout << "5. Salir\n";
+        cout << "5. Guardar resultado en archivo txt\n";
+        cout << "6. Salir\n";
         cout << "Seleccione: ";
         cin >> opcion;
 
@@ -246,6 +286,11 @@ int main() {
             break;
 
         case 5:
+            if (!haySistema) cout << "Debe ingresar un sistema primero.\n";
+            else solver.guardarArchivo();
+            break;
+
+        case 6:
             cout << "Saliendo...\n";
             break;
 
@@ -253,7 +298,7 @@ int main() {
             cout << "Opcion invalida.\n";
         }
 
-    } while (opcion != 5);
+    } while (opcion != 6);
 
     return 0;
 }
