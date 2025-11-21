@@ -102,10 +102,37 @@ public:
         S = s;
     }
 
+    // Opción 3: mostrar solo resultado final
     void resolver() {
         int n = S->n;
         vector<double> x(n, 0.0);
         vector<double> x_new(n, 0.0);
+
+        // Verificar ceros en diagonal
+        for(int i=0; i<n; i++){
+            if(S->A[i][i] == 0){
+                cout << "Error: la matriz tiene 0 en la diagonal. Jacobi no puede continuar.\n";
+                return;
+            }
+        }
+
+        // Verificar diagonal dominante estricta
+        bool converge = true;
+        for(int i=0; i<n; i++){
+            double suma = 0;
+            for(int j=0; j<n; j++){
+                if(i != j) suma += abs(S->A[i][j]);
+            }
+            if(abs(S->A[i][i]) <= suma){
+                converge = false;
+                break;
+            }
+        }
+        if(!converge){
+            cout << "ADVERTENCIA: La matriz no es estrictamente diagonal dominante.\n";
+            cout << "Jacobi puede no converger o generar valores infinitos.\n";
+            return;
+        }
 
         tabla.clear();
         tabla.push_back(x); // Iteración 0
@@ -113,11 +140,6 @@ public:
         int iter = 0;
         double tolerancia = pow(10, -S->fixDecimales);
         double error = tolerancia + 1;
-
-        cout << fixed << setprecision(S->fixDecimales);
-        cout << "\n--- ITERACION 0 ---\n";
-        for (int i = 0; i < n; i++) cout << "x" << i + 1 << " = " << x[i] << "  ";
-        cout << "\n";
 
         while (error > tolerancia) {
             iter++;
@@ -137,13 +159,10 @@ public:
 
             x = x_new;
             tabla.push_back(x);
-
-            // Mostrar iteración opcional
-            cout << "--- Iteracion " << iter << " ---\n";
-            for (int i = 0; i < n; i++) cout << "x" << i + 1 << " = " << x[i] << "  ";
-            cout << "\n";
         }
 
+        // Mostrar solo resultado final
+        cout << fixed << setprecision(S->fixDecimales);
         cout << "\n--- RESULTADO FINAL ---\n";
         cout << "Iteraciones necesarias: " << iter << "\n";
         for (int i = 0; i < n; i++) cout << "x" << i + 1 << " = " << x[i] << "\n";
@@ -185,7 +204,7 @@ int main() {
         cout << "\n\n====== MENU ======\n";
         cout << "1. Ingresar sistema y reacomodar diagonal dominante\n";
         cout << "2. Mostrar formulas de Jacobi\n";
-        cout << "3. Calcular con Jacobi hasta tolerancia\n";
+        cout << "3. Calcular con Jacobi hasta tolerancia (resultado final)\n";
         cout << "4. Mostrar tabla de iteraciones\n";
         cout << "5. Salir\n";
         cout << "Seleccione: ";
