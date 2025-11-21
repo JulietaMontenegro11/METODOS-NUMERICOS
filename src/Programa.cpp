@@ -184,67 +184,7 @@ public:
         for(int i=0;i<n;i++) cout << "x" << i+1 << " = " << x[i] << "\n";
     }
 
-    void mostrarTablaCompleta() {
-        if(!metodoConvergente){
-            cout << "No es posible generar tabla dado a que el metodo no puede converger.\n";
-            return;
-        }
-        int n=S->n;
-        cout << fixed << setprecision(S->fixDecimales);
-        cout << "\n--- TABLA COMPLETA ---\n";
-        for(int k=0;k<tabla.size();k++){
-            cout << "Iteracion " << k << ": ";
-            for(int i=0;i<n;i++) cout << "x" << i+1 << "=" << tabla[k][i] << "  ";
-            cout << "\n";
-        }
-    }
-
-    void mostrarTablaRango(int ini,int fin){
-        if(!metodoConvergente){
-            cout << "No es posible generar tabla dado a que el metodo no puede converger.\n";
-            return;
-        }
-        if(ini<0 || fin>=tabla.size() || ini>fin){
-            cout << "ADVERTENCIA: Rango invalido. Iteraciones disponibles: 0 a " << tabla.size()-1 << "\n";
-            return;
-        }
-        int n=S->n;
-        cout << fixed << setprecision(S->fixDecimales);
-        cout << "\n--- TABLA EN RANGO ---\n";
-        for(int k=ini;k<=fin;k++){
-            cout << "Iteracion " << k << ": ";
-            for(int i=0;i<n;i++) cout << "x" << i+1 << "=" << tabla[k][i] << "  ";
-            cout << "\n";
-        }
-    }
-
-    void guardarArchivo(){
-        ofstream archivo("resultado.txt");
-        if(!archivo.is_open()){cout<<"Error al crear archivo.\n"; return;}
-        archivo << fixed << setprecision(S->fixDecimales);
-        archivo << "--- SISTEMA CON DIAGONAL DOMINANTE ---\n";
-        for(int i=0;i<S->n;i++){
-            for(int j=0;j<S->n;j++)
-                archivo << S->A[i][j] << "x" << j+1 << "  ";
-            archivo << "= " << S->b[i] << "\n";
-        }
-        if(metodoConvergente){
-            archivo << "\n--- RESULTADO FINAL ---\n";
-            for(int i=0;i<S->n;i++)
-                archivo << "x" << i+1 << " = " << resultadoFinal[i] << "\n";
-            archivo << "\n--- TABLA DE ITERACIONES ---\n";
-            for(int k=0;k<tabla.size();k++){
-                archivo << "Iteracion " << k << ": ";
-                for(int i=0;i<S->n;i++)
-                    archivo << "x" << i+1 << "=" << tabla[k][i] << "  ";
-                archivo << "\n";
-            }
-        } else {
-            archivo << "\nNo es posible generar resultados ni tabla dado a que el método no puede converger.\n";
-        }
-        archivo.close();
-        cout << "Archivo 'resultado.txt' creado correctamente.\n";
-    }
+    
 };
 
 int main() {
@@ -277,19 +217,7 @@ int main() {
                 if(haySistema) solver.resolver();
                 else cout << "Debe ingresar un sistema primero.\n";
                 break;
-            case 4:
-                if(!haySistema){cout<<"Debe ingresar un sistema primero.\n"; break;}
-                int tipo; cout<<"1. Tabla completa\n2. Tabla por rango\nSeleccione: "; cin>>tipo;
-                if(tipo==1) solver.mostrarTablaCompleta();
-                else{
-                    int i,f; cout<<"Iteracion inicial: "; cin>>i; cout<<"Iteracion final: "; cin>>f;
-                    solver.mostrarTablaRango(i,f);
-                }
-                break;
-            case 5:
-                if(!haySistema) cout<<"Debe ingresar un sistema primero.\n";
-                else solver.guardarArchivo();
-                break;
+
             case 6: cout<<"Saliendo...\n"; break;
             default: cout<<"Opcion invalida.\n";
         }
