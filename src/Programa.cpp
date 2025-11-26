@@ -109,14 +109,14 @@ public:
     void mostrarSistema() {
         cout << "\n                                                                   SISTEMA ACTUAL \n";
 
-        int anchoTerminal = 140; // ancho estimado de tu terminal
-        int nColumnas = n;      // número de incógnitas
-        int colAncho = 5;      // espacio para cada columna (coeficiente + xN)
-        int totalAncho = nColumnas * colAncho + 5; // 5 para el "= b"
+        int anchoTerminal = 140;
+        int nColumnas = n;
+        int colAncho = 5;
+        int totalAncho = nColumnas * colAncho + 5;
         int margenIzq = max(0, (anchoTerminal - totalAncho)/2);
 
         for(int i=0;i<n;i++){
-            cout << string(margenIzq, ' '); // margen izquierdo para centrar la fila
+            cout << string(margenIzq, ' ');
             for(int j=0;j<n;j++){
                 cout << setw(colAncho) << A[i][j] << "x" << j+1;
             }
@@ -125,17 +125,16 @@ public:
     }
 
     void mostrarFormulas() {
-        cout << "\n                                                                   FORMULAS DE JACOBI \n";
-        int anchoTerminal = 80;         // ancho estimado de la terminal
-        int nColumnas = n;              // número de incógnitas
-        int colAncho = 20;              // espacio reservado para cada término (coeficiente*x)
-        int totalAncho = nColumnas * colAncho + 10; // +10 para paréntesis y división
+        cout << "\n                                                                FORMULAS DE JACOBI \n";
+        int anchoTerminal = 80;
+        int nColumnas = n;
+        int colAncho = 20;
+        int totalAncho = nColumnas * colAncho + 1;
         int margenIzq = max(0, (anchoTerminal - totalAncho)/2);
 
         for(int i=0;i<n;i++){
-            cout << string(margenIzq, ' '); // margen izquierdo para centrar la fórmula
+            cout << string(margenIzq, ' ');
             cout << "x" << i+1 << " = ( " << b[i] << " - (";
-
             for(int j=0;j<n;j++){
                 if(j!=i){
                     cout << A[i][j] << "*x" << j+1;
@@ -153,16 +152,16 @@ public:
     vector<vector<double>> tabla;
     vector<double> resultadoFinal;
     bool ejecutado = false;
+    bool metodoConvergente = false;
 
     JacobiSolver(SistemaLineal *s){S=s;}
 
     void resolver() {
         int n = S->n;
-        vector<double> x(n,0.0);      // vector con valores iniciales de las incógnitas (iteración 0)
-        vector<double> x_new(n,0.0);  // vector para almacenar los nuevos valores de cada iteración
-        ejecutado = false;
+        vector<double> x(n,0.0);
+        vector<double> x_new(n,0.0);
+        metodoConvergente = false;
 
-        // Verificar que la diagonal no tenga ceros
         for(int i=0;i<n;i++){
             if(S->A[i][i]==0){
                 cout << "\n                                                      Error: hay cero en diagonal. Jacobi no puede continuar.\n";
@@ -170,21 +169,19 @@ public:
             }
         }
 
-        // Verificar si la matriz es estrictamente diagonal dominante
         if(!S->esDiagonalDominante(S->A)){
             cout << "\n                                                      ADVERTENCIA: La matriz no es estrictamente diagonal dominante.\n"
                  << "\n                                                      Jacobi puede no converger o generar valores infinitos.\n";
         }
 
-        ejecutado = true;
+        metodoConvergente = true;
         tabla.clear();
-        tabla.push_back(x); // guardamos iteración 0
+        tabla.push_back(x);
 
         int iter=0;
-        double tolerancia = pow(10,-S->fixDecimales); // tolerancia según el número de decimales
+        double tolerancia = pow(10,-S->fixDecimales);
         double error = tolerancia+1;
 
-        // Ciclo principal de Jacobi
         while(error>tolerancia){
             iter++;
             for(int i=0;i<n;i++){
@@ -194,7 +191,6 @@ public:
                 x_new[i]=(S->b[i]-suma)/S->A[i][i];
             }
 
-            // calcular error máximo
             error = 0;
             for(int i=0;i<n;i++){
                 double dif = abs(x_new[i]-x[i]);
@@ -202,23 +198,23 @@ public:
             }
 
             x = x_new;
-            tabla.push_back(x); // guardar resultados de la iteración
+            tabla.push_back(x);
         }
 
         resultadoFinal = x;
+        ejecutado = true;
 
-        // ---- Imprimir resultados centrados ----
-        int anchoTerminal = 140;       // ancho estimado de la terminal
-        int nColumnas = n;            // número de incógnitas
-        int colAncho = 20;            // espacio reservado para cada valor (x1, x2, ...)
-        int totalAncho = nColumnas * colAncho + 15; // +15 para "Iteraciones necesarias" y "="
+        int anchoTerminal = 140;
+        int nColumnas = n;
+        int colAncho = 20;
+        int totalAncho = nColumnas * colAncho + 1;
         int margenIzq = max(0, (anchoTerminal - totalAncho)/2);
 
-        cout << "\n" << string(margenIzq, ' ') << "                                                                   RESULTADO FINAL \n";
+        cout << "\n" << string(margenIzq, ' ') << "                             RESULTADO FINAL \n";
         cout << string(margenIzq, ' ') << "Iteraciones necesarias: " << iter << "\n";
 
         for(int i=0;i<n;i++){
-            cout << string(margenIzq, ' '); // aplica margen izquierdo
+            cout << string(margenIzq, ' ');
             cout << "x" << i+1 << " = " << x[i] << "\n";
         }
     }
@@ -230,24 +226,23 @@ public:
         }
 
         if(tabla.empty()){
-            cout << "\n                                                      ADVERTENCIA: Jacobi no se ha ejecutado. Los valores se muestran como ceros iniciales.\n";
+            cout << "\n                                                      ADVERTENCIA: Jacobi no se ha ejecutado. Calculando tabla automáticamente...\n";
+            resolver();
+            ejecutado = false;
         }
 
         int n = S->n;
-        int anchoTerminal = 140;      // ancho estimado de la terminal
-        int colAncho = 20;           // espacio para cada columna
-        int totalAncho = (n + 1) * colAncho; // +1 para la columna de iteración
+        int anchoTerminal = 140;
+        int colAncho = 20;
+        int totalAncho = (n + 1) * colAncho;
         int margenIzq = max(0, (anchoTerminal - totalAncho)/2);
 
-        cout << "\n" << string(margenIzq, ' ') << "                                                                   TABLA DE ITERACIONES \n";
-
-        // Cabecera
+        cout << "\n" << string(margenIzq, ' ') << "                           TABLA DE ITERACIONES \n";
         cout << string(margenIzq, ' ') << setw(colAncho) << "Iteracion";
         for(int i=0;i<n;i++)
             cout << setw(colAncho) << ("x" + to_string(i+1));
         cout << "\n";
 
-        // Filas de la tabla
         for(int k=0;k<tabla.size();k++){
             cout << string(margenIzq, ' ') << setw(colAncho-2) << k << ":";
             for(int i=0;i<n;i++)
@@ -263,7 +258,9 @@ public:
         }
 
         if(tabla.empty()){
-            cout << "                                                      ADVERTENCIA: Jacobi no se ha ejecutado. Los valores se muestran como ceros iniciales.\n";
+            cout << "\n                                                      ADVERTENCIA: Jacobi no se ha ejecutado. Calculando tabla automáticamente...\n";
+            resolver();
+            ejecutado = false;
         }
 
         if(ini<0 || fin>=tabla.size() || ini>fin){
@@ -272,20 +269,17 @@ public:
         }
 
         int n = S->n;
-        int anchoTerminal = 140;      // ancho estimado de la terminal
-        int colAncho = 20;           // espacio para cada columna
-        int totalAncho = (n + 1) * colAncho; // +1 para la columna de iteración
+        int anchoTerminal = 140;
+        int colAncho = 20;
+        int totalAncho = (n + 1) * colAncho;
         int margenIzq = max(0, (anchoTerminal - totalAncho)/2);
 
-        cout << "\n" << string(margenIzq, ' ') << "                                                                   TABLA DE ITERACIONES EN RANGO\n";
-
-        // Cabecera
+        cout << "\n" << string(margenIzq, ' ') << "                           TABLA DE ITERACIONES EN RANGO\n";
         cout << string(margenIzq, ' ') << setw(colAncho) << "Iteracion";
         for(int i=0;i<n;i++)
             cout << setw(colAncho) << ("x" + to_string(i+1));
         cout << "\n";
 
-        // Filas del rango
         for(int k=ini;k<=fin;k++){
             cout << string(margenIzq, ' ') << setw(colAncho-2) << k << ":";
             for(int i=0;i<n;i++)
@@ -299,13 +293,11 @@ public:
         if(!archivo.is_open()){cout<<"                                                      Error al crear archivo.\n"; return;}
         archivo << fixed << setprecision(S->fixDecimales);
         archivo << "                                                                   SISTEMA CON DIAGONAL DOMINANTE \n";
-
         for(int i=0;i<S->n;i++){
             for(int j=0;j<S->n;j++)
                 archivo << S->A[i][j] << " x" << j+1 << "  ";
             archivo << "= " << S->b[i] << "\n";
         }
-
         if(ejecutado){
             archivo << "\n                                                                   RESULTADO FINAL \n\n";
             for(int i=0;i<S->n;i++)
@@ -325,7 +317,6 @@ public:
     }
 };
 
-// Función para limpiar pantalla
 void limpiarPantalla(){
 #ifdef _WIN32
     system("cls");
@@ -386,6 +377,7 @@ int main() {
 
     return 0;
 }
+
 
 
 
