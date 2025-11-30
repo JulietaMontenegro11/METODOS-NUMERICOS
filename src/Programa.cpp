@@ -125,10 +125,10 @@ public:
     }
 
     void mostrarFormulas() {
-        cout << "\n                                                                FORMULAS DE JACOBI \n";
-        int anchoTerminal = 80;
+        cout << "\n                                                                FORMULAS DE JACOBI \n\n\n";
+        int anchoTerminal = 125;
         int nColumnas = n;
-        int colAncho = 20;
+        int colAncho = 1;
         int totalAncho = nColumnas * colAncho + 1;
         int margenIzq = max(0, (anchoTerminal - totalAncho)/2);
 
@@ -204,14 +204,14 @@ public:
         resultadoFinal = x;
         ejecutado = true;
 
-        int anchoTerminal = 140;
+        int anchoTerminal = 125;
         int nColumnas = n;
-        int colAncho = 20;
+        int colAncho = 1;
         int totalAncho = nColumnas * colAncho + 1;
         int margenIzq = max(0, (anchoTerminal - totalAncho)/2);
 
-        cout << "\n" << string(margenIzq, ' ') << "                             RESULTADO FINAL \n";
-        cout << string(margenIzq, ' ') << "Iteraciones necesarias: " << iter << "\n";
+        cout << "\n" << string(margenIzq, ' ') << "  RESULTADO FINAL \n\n\n";
+        cout << string(margenIzq, ' ') << "Iteraciones necesarias: " << iter << "\n\n";
 
         for(int i=0;i<n;i++){
             cout << string(margenIzq, ' ');
